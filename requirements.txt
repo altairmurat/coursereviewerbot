@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+telethon
+sqlalchemy
+psycopg2-binary
+python-dotenv
