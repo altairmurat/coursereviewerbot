@@ -51,16 +51,11 @@ def get_course_reviews():
         coursedetails = db.query(models.CourseReview).all()
         
         list_coursedetails = []
-        dict_coursedetails = {
-            "course name": "",
-            "course professor": "",
-            "course review": ""
-        }
         
         for i in range(len(coursedetails)):
-            dict_coursedetails["course name"] = coursedetails[i].course_name
-            dict_coursedetails["course professor"] = coursedetails[i].course_professor
-            dict_coursedetails["course review"] = coursedetails[i].course_review
+            dict_coursedetails = {"course name": coursedetails[i].course_name,
+                                "course professor": coursedetails[i].course_professor,
+                                "course review": coursedetails[i].course_review}
             list_coursedetails.append(dict_coursedetails)
             
         return list_coursedetails
