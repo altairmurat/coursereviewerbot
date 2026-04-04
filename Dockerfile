@@ -14,5 +14,5 @@ COPY . .
 COPY start.sh .
 RUN chmod +x start.sh
 
-EXPOSE 8000
+EXPOSE 8010
 CMD ["./start.sh"]
