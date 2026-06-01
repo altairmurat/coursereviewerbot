@@ -1,4 +1,4 @@
-from telethon import TelegramClient, events
+from telethon import TelegramClient, events, Button
 import asyncio
 from fastapi import FastAPI
 from env import *
@@ -67,6 +67,29 @@ def get_course_reviews():
         return list_coursedetails
     except Exception as e:
         return f"cannot extract reviews {e}"
+
+reviews = get_course_reviews()
+items_per_page = 2
+def get_page_data(page: int):
+    start_idx = page * items_per_page
+    end_idx = start_idx + items_per_page
+    page_text = reviews[start_idx:end_idx]
+    
+    text = f"**Page {page + 1}**\n\n" + "\n".join(page_text)
+    
+    total_pages = (len(reviews) - 1) // items_per_page + 1
+    
+    buttons = []
+    
+    if page > 0:
+        buttons.append(Button.inline("<- Back", data=f"page_{page - 1}"))
+    
+    if page < total_pages - 1:
+        buttons.append(Button.inline("-> Further", data=f"page_{page + 1}"))
+    
+    return text, buttons
+
+
         
 @client.on(events.NewMessage(pattern='/start'))
 async def starthandler(event):
@@ -92,22 +115,14 @@ async def review_add_message(event):
     
 @client.on(events.NewMessage(pattern='/review_list'))
 async def review_list_message(event):
-    try:
-        list_coursedetails = get_course_reviews()
-        sumdetails = ''
-        for index, coursedetail in enumerate(list_coursedetails, start=1):
-            eachdetail = f"""
-{index}. Course Name: {coursedetail["course name"]}
-Course Professor: {coursedetail["course professor"]}
-Course Review: {coursedetail["course review"]}
-                            """
-            sumdetails += eachdetail
-        
-        await event.respond(f"""
-                            Course reviews:
-{sumdetails}""")
-    except Exception as e:
-        return e
+    text, buttons = get_page_data(0)
+    await event.respond(text, buttons=buttons)
+    
+@client.on(events.CallbackQuery(pattern=r'page_(\d+)'))
+async def change_page(event):
+    target_page = int(event.data_match.group(1))
+    text, buttons = get_page_data(target_page)
+    await event.edit(text, buttons=buttons)
     
 @client.on(events.NewMessage)
 async def necessary_task_handler(event):
