@@ -72,13 +72,13 @@ def get_course_reviews():
 async def starthandler(event):
     await event.respond("""
                         Hi, I can help you with saving reviews about some courses.\n
-                        tap /help to see what I can do!""")
+tap /help to see what I can do!""")
     
 @client.on(events.NewMessage(pattern='/help'))
 async def helphandler(event):
     await event.respond("""
-                        /review_add - add review about courses
-                        /review_list - see all reviews about courses""")
+                        /review_add - add review about courses\n
+/review_list - see all reviews about courses""")
         
 @client.on(events.NewMessage(pattern='/review_add'))
 async def review_add_message(event):
@@ -121,22 +121,23 @@ async def necessary_task_handler(event):
         if user_id in user_states:
             if user_states[user_id] == "waiting_for_":
                 usermessage = event.text.split("/")
-                    
-    elif user_id in user_states and user_states[user_id] == "waiting_for_professorname":
-        user_states[f"{user_id}review"]["professorname"] = event.text
-        user_states[user_id] = "waiting_for_coursename"
-        await event.respond(f"Course Name (taught by professor - {event.text})")
-    elif user_states[user_id] == "waiting_for_coursename":
-        user_states[f"{user_id}review"]["coursename"] = event.text
-        user_states[user_id] = "waiting_for_review"
-        await event.respond(f"Write review about {event.text} course. Grading; Workloadness; Your final grade; and etc that would help future students to choose courses. Your review is absolutely anonymous. However, it is kindly requested to follow the basic ethics!")
-    elif user_states[user_id] == "waiting_for_review":
-        user_states[f"{user_id}review"]["review"] = event.text
-        user_states[user_id] = ""
-        coursereview = user_states[f"{user_id}review"]
-        try:
-            add_course_review(sender.username, coursereview["professorname"], coursereview["coursename"], coursereview["review"])
-            await event.respond("Successfully added your review. Check it here /review_list")
-        except Exception as e:
-            await event.respond(f"Could not save your review: {e}")
+                
+    if user_id in user_states:                
+        if user_states[user_id] == "waiting_for_professorname":
+            user_states[f"{user_id}review"]["professorname"] = event.text
+            user_states[user_id] = "waiting_for_coursename"
+            await event.respond(f"Course Name (taught by professor - {event.text})")
+        elif user_states[user_id] == "waiting_for_coursename":
+            user_states[f"{user_id}review"]["coursename"] = event.text
+            user_states[user_id] = "waiting_for_review"
+            await event.respond(f"Write review about {event.text} course. Grading; Workloadness; Your final grade; and etc that would help future students to choose courses. Your review is absolutely anonymous. However, it is kindly requested to follow the basic ethics!")
+        elif user_states[user_id] == "waiting_for_review":
+            user_states[f"{user_id}review"]["review"] = event.text
+            user_states[user_id] = ""
+            coursereview = user_states[f"{user_id}review"]
+            try:
+                add_course_review(sender.username, coursereview["professorname"], coursereview["coursename"], coursereview["review"])
+                await event.respond("Successfully added your review. Check it here /review_list")
+            except Exception as e:
+                await event.respond(f"Could not save your review: {e}")
             
