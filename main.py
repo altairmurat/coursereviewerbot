@@ -95,14 +95,14 @@ async def review_list_message(event):
     try:
         list_coursedetails = get_course_reviews()
         output_list = []
-        sumdetails = ''
+        sumdetails = []
         for index, coursedetail in enumerate(list_coursedetails, start=1):
             eachdetail = f"""
 {index}. Course Name: {coursedetail["course name"]}
 Course Professor: {coursedetail["course professor"]}
 Course Review: {coursedetail["course review"]}
                             """
-            sumdetails += eachdetail
+            sumdetails.append(eachdetail)
         
         await event.respond(f"""
                             Course reviews:
