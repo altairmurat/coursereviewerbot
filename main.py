@@ -10,6 +10,12 @@ app = FastAPI()
 client = TelegramClient('session_coursereviewerbot', API_ID, API_HASH)
 
 user_states = {}
+#user_states = {  }
+review = {
+    "professorname": "",
+    "coursename": "",
+    "review": ""
+}
 
 @app.on_event("startup")
 async def startup_event():
@@ -77,11 +83,10 @@ async def helphandler(event):
 @client.on(events.NewMessage(pattern='/review_add'))
 async def review_add_message(event):
     user_id = event.sender_id
-    user_states[user_id] = "waiting_for_review_add"
+    user_states[user_id] = "waiting_for_professorname"
     await event.respond(
-        """Send the '!'/course name/course professor name/your review about course to me, and I will save it into the database\n\n
-example:\n
-!Introduction To Programming/Kisub Kim/I liked it very much because the professor explained the python very well.
+        """
+        Professor Name (whose course you want to review)
         """
     )
     
@@ -114,10 +119,24 @@ async def necessary_task_handler(event):
         return
     elif event.text.startswith("!"):
         if user_id in user_states:
-            if user_states[user_id] == "waiting_for_review_add":
-                coursereview = event.text.split("/")
-                try:
-                    add_course_review(sender.username, coursereview[0][1:], coursereview[1], coursereview[2])
-                    await event.respond("Successfully added your review")
-                except Exception as e:
-                    await event.respond(f"Could not save your review: {e}") 
+            if user_states[user_id] == "waiting_for_":
+                usermessage = event.text.split("/")
+                    
+    elif user_id in user_states and user_states[user_id] == "waiting_for_professorname":
+        user_states[f"{user_id}review"]["professorname"] = event.text
+        user_states[user_id] = "waiting_for_coursename"
+        await event.respond(f"Course Name (taught by professor - {event.text})")
+    elif user_states[user_id] == "waiting_for_coursename":
+        user_states[f"{user_id}review"]["coursename"] = event.text
+        user_states[user_id] = "waiting_for_review"
+        await event.respond(f"Write review about {event.text} course. Grading; Workloadness; Your final grade; and etc that would help future students to choose courses. Your review is absolutely anonymous. However, it is kindly requested to follow the basic ethics!")
+    elif user_states[user_id] == "waiting_for_review":
+        user_states[f"{user_id}review"]["review"] = event.text
+        user_states[user_id] = ""
+        coursereview = user_states[f"{user_id}review"]
+        try:
+            add_course_review(sender.username, coursereview["professorname"], coursereview["coursename"], coursereview["review"])
+            await event.respond("Successfully added your review. Check it here /review_list")
+        except Exception as e:
+            await event.respond(f"Could not save your review: {e}")
+            
