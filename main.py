@@ -124,7 +124,9 @@ async def necessary_task_handler(event):
                 
     if user_id in user_states:                
         if user_states[user_id] == "waiting_for_professorname":
-            user_states[f"{user_id}review"]["professorname"] = event.text
+            user_states[f"{user_id}review"] = {"professorname": event.text,
+                                                "coursename": "",
+                                                "review": ""}
             user_states[user_id] = "waiting_for_coursename"
             await event.respond(f"Course Name (taught by professor - {event.text})")
         elif user_states[user_id] == "waiting_for_coursename":
