@@ -68,9 +68,9 @@ def get_course_reviews():
     except Exception as e:
         return f"cannot extract reviews {e}"
 
-reviews = get_course_reviews()
-items_per_page = 2
 def get_page_data(page: int):
+    reviews = get_course_reviews()
+    items_per_page = 2
     start_idx = page * items_per_page
     end_idx = start_idx + items_per_page
     list_coursedetails = reviews[start_idx:end_idx]
@@ -84,7 +84,7 @@ Course Review: {coursedetail["course review"]}
                             """
         sumdetails += eachdetail
     
-    text = f"**Page {page + 1}**\n\n" + "\n".join(sumdetails)
+    text = f"**Page {page + 1}**\n\n{sumdetails}"
     
     total_pages = (len(reviews) - 1) // items_per_page + 1
     
@@ -125,6 +125,12 @@ async def review_add_message(event):
 async def review_list_message(event):
     text, buttons = get_page_data(0)
     await event.respond(text, buttons=buttons)
+    
+@client.on(events.CallbackQuery(pattern=r'page_(\d+)'))
+async def change_page(event):
+    target_page = int(event.data_match.group(1))
+    text, buttons = get_page_data(target_page)
+    await event.edit(text, buttons=buttons)
     
 @client.on(events.NewMessage)
 async def necessary_task_handler(event):
