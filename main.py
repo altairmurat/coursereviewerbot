@@ -73,9 +73,18 @@ items_per_page = 2
 def get_page_data(page: int):
     start_idx = page * items_per_page
     end_idx = start_idx + items_per_page
-    page_text = reviews[start_idx:end_idx]
+    list_coursedetails = reviews[start_idx:end_idx]
     
-    text = f"**Page {page + 1}**\n\n" + "\n".join(page_text)
+    sumdetails = ''
+    for index, coursedetail in enumerate(list_coursedetails, start=1):
+        eachdetail = f"""
+{index}. Course Name: {coursedetail["course name"]}
+Course Professor: {coursedetail["course professor"]}
+Course Review: {coursedetail["course review"]}
+                            """
+        sumdetails += eachdetail
+    
+    text = f"**Page {page + 1}**\n\n" + "\n".join(sumdetails)
     
     total_pages = (len(reviews) - 1) // items_per_page + 1
     
@@ -88,7 +97,6 @@ def get_page_data(page: int):
         buttons.append(Button.inline("-> Further", data=f"page_{page + 1}"))
     
     return text, buttons
-
 
         
 @client.on(events.NewMessage(pattern='/start'))
@@ -117,12 +125,6 @@ async def review_add_message(event):
 async def review_list_message(event):
     text, buttons = get_page_data(0)
     await event.respond(text, buttons=buttons)
-    
-@client.on(events.CallbackQuery(pattern=r'page_(\d+)'))
-async def change_page(event):
-    target_page = int(event.data_match.group(1))
-    text, buttons = get_page_data(target_page)
-    await event.edit(text, buttons=buttons)
     
 @client.on(events.NewMessage)
 async def necessary_task_handler(event):
